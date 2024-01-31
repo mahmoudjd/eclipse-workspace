@@ -1,0 +1,136 @@
+package tic_tac_toe;
+
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+
+public class TicTacToe extends JFrame {
+    private static final long serialVersionUID = 1L;
+    private static final int BOARD_SIZE = 3;
+    private static final int CELL_SIZE = 100;
+    private JButton[][] buttons;
+    private String[][] game;
+    private String currentPlayer;
+
+    public TicTacToe() {
+        super("Tic-Tac-Toe");
+        buttons = new JButton[BOARD_SIZE][BOARD_SIZE];
+        game = new String[BOARD_SIZE][BOARD_SIZE];
+        currentPlayer = "X"; // Set initial player to "X"
+    }
+
+    public void run() {
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new GridLayout(BOARD_SIZE, BOARD_SIZE));
+
+        buttons = new JButton[BOARD_SIZE][BOARD_SIZE];
+        game = new String[BOARD_SIZE][BOARD_SIZE];
+
+        ButtonClickListener buttonClickListener = new ButtonClickListener();
+
+        for (int row = 0; row < BOARD_SIZE; row++) {
+            for (int col = 0; col < BOARD_SIZE; col++) {
+                buttons[row][col] = new JButton();
+                buttons[row][col].setFont(new Font(Font.SANS_SERIF, Font.BOLD, 50));
+                buttons[row][col].addActionListener(buttonClickListener);
+                add(buttons[row][col]);
+            }
+        }
+
+        setSize(BOARD_SIZE * CELL_SIZE, BOARD_SIZE * CELL_SIZE);
+        setVisible(true);
+    }
+
+    public String[][] getGame() {
+        return game;
+    }
+
+    private class ButtonClickListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            JButton clickedButton = (JButton) e.getSource();
+
+            // Find the clicked button's position in the array
+            for (int row = 0; row < BOARD_SIZE; row++) {
+                for (int col = 0; col < BOARD_SIZE; col++) {
+                    if (buttons[row][col] == clickedButton) {
+                        makeMove(row, col);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    public void makeMove(int row, int col) {
+        if (game[row][col] != null) {
+            // Cell already occupied, do nothing
+            return;
+        }
+
+        game[row][col] = currentPlayer;
+        buttons[row][col].setText(currentPlayer);
+
+        if (checkWinner(currentPlayer)) {
+            JOptionPane.showMessageDialog(this, "Player " + currentPlayer + " wins!");
+            resetGame();
+        } else if (isBoardFull()) {
+            JOptionPane.showMessageDialog(this, "It's a tie!");
+            resetGame();
+        } else {
+            // Switch the current player
+            currentPlayer = currentPlayer.equals("X") ? "O" : "X";
+        }
+    }
+
+    public boolean checkWinner(String currentPlayer) {
+        // Check rows and columns
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            if (currentPlayer.equals(game[i][0]) && currentPlayer.equals(game[i][1])
+                    && currentPlayer.equals(game[i][2])) {
+                return true; // Row i is a win
+            }
+            if (currentPlayer.equals(game[0][i]) && currentPlayer.equals(game[1][i])
+                    && currentPlayer.equals(game[2][i])) {
+                return true; // Column i is a win
+            }
+        }
+
+        // Check diagonals
+        if (currentPlayer.equals(game[0][0]) && currentPlayer.equals(game[1][1])
+                && currentPlayer.equals(game[2][2])) {
+            return true; // Diagonal from top-left to bottom-right is a win
+        }
+        if (currentPlayer.equals(game[0][2]) && currentPlayer.equals(game[1][1])
+                && currentPlayer.equals(game[2][0])) {
+            return true; // Diagonal from top-right to bottom-left is a win
+        }
+
+        return false;
+    }
+
+    public boolean isBoardFull() {
+        for (String[] row : game) {
+            for (String cell : row) {
+                if (cell == null) {
+                    return false; // Found an empty cell, board is not full
+                }
+            }
+        }
+        return true; // All cells are filled, board is full
+    }
+
+    public void resetGame() {
+        currentPlayer = "X";
+        for (int row = 0; row < BOARD_SIZE; row++) {
+            for (int col = 0; col < BOARD_SIZE; col++) {
+                buttons[row][col].setText("");
+                game[row][col] = null;
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        new TicTacToe().run();
+    }
+}
